@@ -1,0 +1,113 @@
+---
+title: "Assignment1"
+author: "Sofie Ditmer"
+date: "2/2/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Install Packages
+```{r}
+library(htmlwidgets)
+library(leaflet)
+library(dplyr)
+library(htmltools)
+```
+
+Task: Your colleague has found some ruins during a hike in the Blue Mountains and recorded the coordinates of structures on her phone (RCFeature.csv). She would like to map her points but has no computer or mapping skills. Can you make a map that she can work with using only a browser? She needs an interactive map that she can download to her computer and use straightaway.
+
+Create a standalone .html map in Leaflet showing at least basic topography and relief, and load in the table of points. Make sure she can see the FeatureID, FeatureType and Description attributes when she hovers over the point markers. 
+
+```{r}
+# I start by loading the data
+ruins <- read.csv("RCFeature.csv", stringsAsFactors = FALSE)
+
+# I then examine the data using the glimpse() function
+glimpse(ruins)
+
+# I make sure that the columns are numeric
+cols.num <- c("Longitude","Latitude", "Northing", "Easting")
+ruins[cols.num] <- sapply(ruins[cols.num], as.numeric)
+
+# Using leaflet() I make a map of the locations of the ruins. I make sure to add the FeatureId, FeatureType, and Description attributes as popups, which means that the user will be able to see these descriptions when hovering over a data point.
+ruins_map <- leaflet() %>% 
+  addTiles() %>% 
+  addCircleMarkers(
+    lng = ruins$Longitude, 
+    lat = ruins$Latitude,
+    popup = paste("Description:", ruins$Description, "<br>", "Feature ID:", ruins$FeatureID, "<br>", "Feature Type:", ruins$FeatureType,"<br>", "Material:", ruins$Material))
+
+ruins_map
+
+# I now add several ESRI background layers
+esri <- grep("^Esri", providers, value = TRUE)
+
+for (provider in esri) {
+  ruins_map <- ruins_map %>% 
+    addProviderTiles(provider, group = provider)
+}
+
+# I then add the minimap and the measure element to the map
+ruins_map <- ruins_map %>% 
+  # Adding layer control
+  addLayersControl(baseGroups = names(esri),
+                   options = layersControlOptions(collapsed = FALSE)) %>%
+  # Adding the minimap feature
+  addMiniMap(tiles = esri[[1]], toggleDisplay = TRUE,
+             position = "bottomright") %>%
+  addMeasure(
+    position = "bottomleft",
+    primaryLengthUnit = "meters",
+    primaryAreaUnit = "sqmeters",
+    activeColor = "#3D535D",
+    completedColor = "#7D4479") %>% 
+    htmlwidgets::onRender("
+                        function(el, x) {
+                        var myMap = this;
+                        myMap.on('baselayerchange',
+                        function (e) {
+                        myMap.minimap.changeLayer(L.tileLayer.provider(e.name));
+                        })
+                        }") %>%
+  addControl("", position = "topright")
+
+ruins_map
+
+# Below I explore what happens when differentiating the markers by their field accuracy. This means that the markers for each ruin will have a size that corresponds to its associated accuracy. I multiply the accuracy by 10 otherwise the markers will be way too small.
+
+ruins_map <- leaflet() %>% 
+  addTiles() %>% 
+  addCircleMarkers(
+    radius = ruins$Accuracy*10, # differentiating the size of the markers by field accuracy
+    lng = ruins$Longitude, 
+    lat = ruins$Latitude,
+    popup = paste("Description:", ruins$Description, "<br>", "Feature ID:", ruins$FeatureID, "<br>", "Feature Type:", ruins$FeatureType,"<br>", "Material:", ruins$Material), 
+               clusterOptions = markerClusterOptions())
+ruins_map
+
+# Below I explore what happens when adding the marker clustering option. This means that markers will cluster according to their location - hence, ruins that are close geographically will appear in clusters on the map.
+ruins_map <- leaflet() %>% 
+  addTiles() %>% 
+  addCircleMarkers(lng = ruins$Longitude, 
+             lat = ruins$Latitude,
+             popup = paste("Description:", ruins$Description, "<br>", "Feature ID:", ruins$FeatureID, "<br>", "Feature Type:", ruins$FeatureType,"<br>", "Material:", ruins$Material), 
+               clusterOptions = markerClusterOptions()) # adding the clustering option
+ruins_map
+
+# I then save the map as an HTML-file
+saveWidget(ruins_map, "ruins_map.html", selfcontained = TRUE)
+```
+
+
+
+
+
+
+
+
+

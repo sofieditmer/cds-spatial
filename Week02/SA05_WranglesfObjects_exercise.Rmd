@@ -30,7 +30,6 @@ One important difference between `dplyr` with and without spatial data is that t
 
 ## Instructions
 
-
 * Load the packages `sf` and `dplyr`, and the object `trees`  in your workspace.
 * Use the `dplyr` function `count()` to tally the number of trees by species from the `trees` dataset. Sort in decreasing order of `n` by setting `sort` to `TRUE`, and call this new data frame `species_counts`.
 * Use the `head()` function to check if your new data frame has a geometry column.
@@ -39,16 +38,19 @@ One important difference between `dplyr` with and without spatial data is that t
 
 ```{r drop, eval=FALSE}
 # Create a data frame of counts by species
-species_counts <- ___(trees, species, sort = ___)
+species_counts <- dplyr::count(trees, species, sort = TRUE)
+species_counts
 
 # Use head to see if the geometry column is in the data frame
-___(species_counts)
+head(species_counts)
+# Yes, it does
 
 # Drop the geometry column
-species_no_geometry <- ___(species_counts, ___)
+species_no_geometry <- st_set_geometry(species_counts, NULL)
 
 # Confirm the geometry column has been dropped
 head(species_no_geometry)
+# Yes it has now been dropped
 ```
 
 Nice work! The `sf` package conveniently allows you to apply `dplyr` verbs to spatial objects. The default of keeping a geometry column is not always what you want, but you can drop that column with `st_set_geometry(data, NULL)`.
@@ -66,19 +68,20 @@ In this exercise you will test joining spatial and non-spatial data. In particul
 * Use `head()` to confirm that the new fields (`county_fip` and `boro_code`) are included in the trees object.
 ```{r innerj, eval=FALSE}
 # Limit to the fields boro_name, county_fip and boro_code
-boro <- ___(neighborhoods, boro_name, county_fip, boro_code)
+boro <- dplyr::select(neighborhoods, boro_name, county_fip, boro_code)
 
 # Drop the geometry column
-boro_no_geometry <- ___(___, ___)
+boro_no_geometry <- st_set_geometry(boro, NULL)
 
 # Limit to distinct records
-boro_distinct <- ___(boro_no_geometry)
+boro_distinct <- dplyr::distinct(boro_no_geometry)
 
 # Join the county detail into the trees object
-trees_with_county <- ___(trees, boro_distinct, by = c("boroname" = "boro_name"))
+trees_with_county <- dplyr::inner_join(trees, boro_distinct, by = c("boroname" = "boro_name"))
 
 # Confirm the new fields county_fip and boro_code exist
-___(trees_with_county)
+head(trees_with_county)
+# Yes, they are included 
 ```
 
 Excellent! The `sf` package allows you to use common joining and merging functions to combine spatial and non-spatial data. In this exercise you used `dplyr` functions but you could also use a base R function like `merge()`.
@@ -98,32 +101,32 @@ In `sf` you can use the `st_simplify()` function to reduce line and polygon comp
 * Review the geometry of the `neighborhoods_simple` object.
 
 ```{r simplify, eval=FALSE}
-# Library
-___(pryr)
+# Load pryr
+library(pryr)
 
 # Plot the neighborhoods geometry
 plot(st_geometry(neighborhoods), col = "grey")
 
 # Measure the size of the neighborhoods object
-___(neighborhoods)
+object_size(neighborhoods) # 1.84 MB
 
 # Compute the number of vertices in the neighborhoods object
-pts_neighborhoods <- st_cast(___$geometry, "MULTIPOINT")
+pts_neighborhoods <- st_cast(neighborhoods$geometry, "MULTIPOINT")
 cnt_neighborhoods <- sapply(pts_neighborhoods, length)
-sum(cnt_neighborhoods)
+sum(cnt_neighborhoods) # 210736 is the total number of vertices (i.e. the number of points required to delineate a line or polygon)
 
 # Simplify the neighborhoods object
-neighborhoods_simple <- ___(neighborhoods, 
-                            preserveTopology = ___, 
-                            dTolerance = ___)
+neighborhoods_simple <- st_simplify(neighborhoods, 
+                            preserveTopology = TRUE, 
+                            dTolerance = 100)
 
 # Measure the size of the neighborhoods_simple object
-___(neighborhoods_simple)
+object_size(neighborhoods_simple) # 195 kB
 
 # Compute the number of vertices in the neighborhoods_simple object
-pts_neighborhoods_simple <- st_cast(___, "MULTIPOINT")
-cnt_neighborhoods_simple <- sapply(pts_neighborhoods_simple, ___)
-sum(cnt_neighborhoods_simple)
+pts_neighborhoods_simple <- st_cast(neighborhoods_simple$geometry, "MULTIPOINT")
+cnt_neighborhoods_simple <- sapply(pts_neighborhoods_simple, length)
+sum(cnt_neighborhoods_simple) # 2908
 
 # Plot the neighborhoods_simple object geometry
 plot(st_geometry(neighborhoods_simple), col = "grey")
@@ -143,19 +146,21 @@ In order to convert an `sf` object to an `sp` object (which has a Spatial class)
 * Use the `class()` function to confirm the conversion.
 ```{r sf-to-sp, eval=FALSE}
 # Read in the trees data
-trees <- ___("trees.shp")
+trees <- st_read("data/trees.shp")
 
 # Convert to Spatial class
-trees_sp <- ___(trees, Class = ___)
+trees_sp <- as(trees, Class = "Spatial")
 
 # Confirm conversion, should be "SpatialPointsDataFrame"
-___(trees_sp)
+class(trees_sp)
+# The class is now Spatial
 
 # Convert back to sf
-trees_sf <- ___(trees_sp)
+trees_sf <- st_as_sf(trees_sp)
 
 # Confirm conversion
-___(trees_sf)
+class(trees_sf)
+# It has now been converted back to an sf object
 ```
 
 Success! For now you may need to use `as()` and `st_as_sf()` somewhat frequently but as `sp` becomes less common you will be able to stick with `sf` objects.
@@ -175,20 +180,20 @@ If you want to convert your `sf` point objects to a data frame with coordinates,
 
 ```{r csv-to-sf, eval=FALSE}
 # Read in the CSV
-trees <- ___("trees.csv")
+trees <- read.csv("data/trees.csv")
 
 # Convert the data frame to an sf object
-trees_sf <- ___(trees, coords = ___, crs = ___)
+trees_sf <- st_as_sf(trees, coords = c("longitude", "latitude"), crs = 4326)
 
 # Plot the geometry of the points
-plot(___(trees_sf))
+plot(st_geometry(trees_sf))
 
 # Write the file out with coordinates
-___(trees_sf, "new_trees.csv",  layer_options = ___, delete_dsn = TRUE)
+st_write(trees_sf, "new_trees.csv",  layer_options = "GEOMETRY=AS_XY", delete_dsn = TRUE)
 
 # Read in the file you just created and check coordinates
-new_trees <- ___("new_trees.csv")
-___(new_trees)
+new_trees <- read.csv("new_trees.csv")
+head(new_trees)
 ```
 
 Great, working with coordinates by turning them into `sf` objects or writing out to a data frame is a critical skill in spatial analysis. Note that `st_write()` can also be used to write lines and polygons but it wouldn't make sense to write these out with coordinates in the same format.

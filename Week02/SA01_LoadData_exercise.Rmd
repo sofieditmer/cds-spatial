@@ -31,26 +31,38 @@ In this exercise you will read in three shapefiles (one point file and two polyg
 
 ```{r load, eval=FALSE, echo=TRUE}
 # Load the sf package
-___(___)
+library(pacman)
+p_load("sf")
 
 # Read in the trees shapefile
-trees <- ___("data/trees.shp")
+trees <- st_read("data/trees.shp")
 
 # Read in the neighborhood shapefile
-neighborhoods <- ___(___)
+neighborhoods <- st_read("data/neighborhoods.shp")
 
 # Read in the parks shapefile
-parks <- ___(___)
+parks <- st_read("/Users/jdi/SpatialAnalytics/cds-spatial/Week02/data/parks.shp")
 
 # View the first few trees
-___(___)
+head(trees)
 ```
 
 ## Questions: 
 
 1. How many features do `trees` contain and what kind of geometry are they?
+Features: The number of features correspond to the number of rows in the trees dataframe. This means that there are 65217 features (trees).
+Geometry: The trees are points, because they have an x- and a y-coordinate, hence 1 coordinate pair which defines a point
+
 2. How many features are there inside `neighborhoods` and what is their geometry?
-3. What is the CRS value in these objects?
+Features: Inside neighborhoods there are 195 rows which means that there are 195 features. 
+Geometry: The neighborhoods are represented as multipolygons, because there are many coordinate pairs for a single feature.
+
+3. What is the CRS (coordinate reference system) value in these objects?
+```{r}
+# CRS = a code that specifies the dataset's coordinate reference system
+st_crs(neighborhoods$geometry)
+# 4326 or WGS84
+```
 
 Well done, you can see how easy it can be to read in shapefiles and you got your first taste of what an sf object looks like.
 
@@ -73,25 +85,35 @@ Multi-band rasters will have more than one layer. An example is a color aerial p
 
 ```{r loadraster, eval=FALSE, echo=TRUE}
 # Load the raster package
-___(___)
+p_load(raster)
 
 # Read in the tree canopy single-band raster
-canopy <- ___(___)
+canopy <- raster("data/canopy.tif")
 
 # Read in the manhattan Landsat image multi-band raster
-manhattan <- ___(___)
+manhattan <- raster("data/manhattan.tif")
 
 # Get the class for the new objects
-class(___)
-class(___)
+class(canopy) # raster layer
+class(manhattan) # raster layer
 
 # Identify how many layers each object has
-nlayers(___)
-nlayers(___)
+nlayers(canopy)
+nlayers(manhattan)
+# They both have 1 layer/band which means that they are single-band rasters
 ```
 
 Questions:
 
 1. What are the dimensions (number of columns and rows) of the `canopy` raster?
-2. What is the resolution of `manhattan`?
+```{r}
+ncol(canopy) # 253
+nrow(canopy) # 230
+# It has 253 columns and 230 rows 
+```
 
+2. What is the resolution of `manhattan`?
+```{r}
+# The resolution is the size of the individual cells in the matrix
+res(manhattan) # x = 29.99, y = 30.00 - this is the size of each cell in the raster 
+```
