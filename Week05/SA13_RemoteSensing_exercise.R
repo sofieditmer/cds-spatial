@@ -37,7 +37,6 @@ plot(nov4) # plotting band 4
 # Colors have changed a bit. 
 # Colors in plot vary from 0 (black) to 255 (white). Normal colors are between.
 
-
 ###   Libraries needed
 library(raster)
 library(lattice)
