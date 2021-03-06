@@ -29,7 +29,6 @@ library(latticeExtra)
 library(RColorBrewer)
 library(rasterVis)
 library(rgdal)
-library(rgl)
 library(tmap)
 ```
 
@@ -37,8 +36,8 @@ __Data__
 For this task I will need the digital elevation for the Kazanlak Valley with 30m resolution, which is the "Aster.tif" file. I will also be needing the shapefile containing the GPS points for each mound in the Kazanlak valley which is stored in the "Kaz_mounds.shp" file. 
 
 ```{r}
-mounds <- st_read("data/KAZ_mounds.shp")
-aster <- raster("data/Aster.tif")
+mounds <- st_read("data/KAZ_mounds.shp") # shapefile of mound coordinates
+aster <- raster("data/Aster.tif") # raster data of elevation
 ```
 
 __Examining Elevation__
@@ -47,8 +46,8 @@ To get a general sense of where in the landscape the mounds are located, I will 
 Before beginning to extract values from the raster, I need to make sure that the data share the same coordinate reference system (CRS), and if not I need to project to a common CRS.
 
 ```{r}
-st_crs(mounds) # WGS84
-crs(aster) # WGS84
+st_crs(mounds) # WGS84, UTM 35N zone
+crs(aster) # WGS84, UTM 35N zone
 ```
 
 Since they share a common CRS I will not need to reproject. 
@@ -67,100 +66,93 @@ plot(aster_reclass) # plotting to make sure we fixed the issue
 ```
 
 Now the satellite imagery looks much better and we can continue. 
-Now we can make a 3D plot using the rgl package to get a better sense of what the landscape looks like. 
+Before extracting values from the landscape, we need to crop it to a smaller, but more representative region. It makes sense to crop the landscape to only contain the area in which the burial mounds are located, so that it what we will do. We can use the crop() function to crop the landscape to only include the region in which the mounds are located. The crop() function enables us to take the elevation data from the individual mounds only.
 
 ```{r}
-rglwidget()
-plot3D(aster_reclass)
+cropped_aster <- crop(aster_reclass, mounds) # Extracting the elevation data for each mound
 ```
 
-Before extracting values from the landscape, we need to crop it to a smaller, but more representative region. It makes sense to crop the landscape to only contain the area in which the burial mounds are located, so that it what we will do. We can use the crop() function to crop the landscape to only include the region in which the mounds are located.
-
+Let's plot the cropped aster elevation data together with the coordinates of the burial mounds. 
 ```{r}
-cropped_aster <- crop(aster_reclass, mounds)
-```
-
-Let's plot the cropped region.
-
-```{r}
-plot(cropped_aster) # simple plot
-plot3D(cropped_aster) # 3D plot
-
 # Plotting with tmap
-cropped <- tm_shape(cropped_aster) +
-  tm_raster() +
+tm_shape(cropped_aster) +
+  tm_raster(title = "Elevation in meters (m)") +
   tm_shape(mounds) +
   tm_markers(size = 0.3) +
-  tm_layout(main.title = "Cropped Landscape and Markers for Mounds",
-            main.title.size = 1)
-
-cropped
+  tm_scale_bar() +
+  tm_layout(main.title = "Reclassfied Elevation Data and Mound Makers",
+            main.title.size = 1,
+            legend.outside = T)
 ```
 
-Let's look at the cropped vs. uncropped landscape next to each other
-
+Now we can extract the elevation values from region in which the mounds are located. 
 ```{r}
-# Plotting the entire, uncropped landscape with tmap
-uncropped <- tm_shape(aster_reclass) +
-  tm_raster() +
-  tm_shape(mounds) +
-  tm_markers(size = 0.3) +
-  tm_layout(main.title = "Uncropped Landscape and Markers for Mounds",
-  main.title.size = 0.9)
+# Defining elevation bins
+elev_breaks <- c(200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400)
 
-# Plotting the cropped and uncropped next to each other
-tmap_arrange(uncropped, cropped, asp = NA)
+# Extracting elevation values from landscape
+aster_cropped_elev <- values(cropped_aster) 
+
+# Histogram
+hist(aster_cropped_elev,
+     breaks = elev_breaks,
+     xlab = "Elevation in meters (m)",
+     main = "Distribution of Elevation Values")
+
+# Putting the elevation data into bins and calculating the frequency 
+elevation_bins <- data.frame(table(cut(values(aster_reclass), breaks = elev_breaks, dig.lab = 5))) # dig.lab = 5 means 5 digits
+elevation_bins
 ```
 
-Now we can extract the elevation values from the landscape data.
+Now we can move on to examining the distribution of elevation values for the mounds in only.
 ```{r}
-# Defining bins
-breaks <- c(200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400)
-
-# Extracting elevation values from the entire, uncropped landscape
-elevation_bins_uncropped <- cut(values(aster_reclass), breaks = breaks, dig.lab = 5) # dig.lab = 5 means 5 digits
-elevation_df <- data.frame(table(elevation_bins_uncropped)) # converting the elevation values into a data frame
-elevation_df 
-# Now we have a dataframe containing the elevation values grouped in bins and how many mounds fall into each bin of elevation values which provides us with a nice overview of the distribution of elevation values for the entire landscape.
-
-# Let's examine the distribution of elevation values for the entire cropped area
-aster_cropped_elev <- values(cropped_aster) # extracting the elevation values for the cropped landscape
-hist(aster_cropped_elev, breaks = breaks) # plotting 
-```
-
-For the cropped landscape area we can see that most mounds are within the 300-400 elevation values bin. 
-Now we can move on to examining the distribution of elevation values for the mounds in particular. 
-
-Fitst we extract the elevation values for the cropped region that contains the burial mounds and with a histogram we examine the distribution of elevation values of the mounds. 
-```{r}
-# Extracting the elevation values for burial mounds in the cropped area
+# Extracting the elevation values for burial mounds
 mounds$elevation <- raster::extract(cropped_aster, mounds)
 
-# Examine the distribution of elevation values in the cropped area in which the burial mounds are located
-hist(mounds$elevation, breaks = breaks)
-```
+# Examine the distribution of elevation values with a histogram
+hist(mounds$elevation, 
+     breaks = elev_breaks,
+     xlab = "Elevation in meters (m)", 
+     main = "Distribution of Elevation Values")
 
-In contrast to the entire cropped area in which most mounds were in the 300-400 bin of elevation values, the elevation values only for the burial mounds are wihtin the 400-500 elevation value bin. 
-Let's look at the exact frequency of mounds per bin.
-
-```{r}
-mounds_freq <- cut(mounds$elevation, breaks = breaks, dig.lab = 5)
-mounds_freq <- data.frame(table(mounds_freq))
+# Calcualting the exact frequency of mounds per bin.
+mounds_freq <- data.frame(table(cut(mounds$elevation, breaks = elev_breaks, dig.lab = 5)))
 mounds_freq
+
 ```
 
-Now we have the observed freuqnecies per bin, and we know that most burials mounds (616) are located in areas with an elevation between 400 and 500. Now we can calcualte the number of mounds per bin that would be expected if mounds were RANDOMLY located through the landscape randomly. We do so by taking a random sample of mounds from the cropped region and extract their elevation values and examine the distribution of these elevation values to compare with the expected elevation values we found above.  
+Now we have the observed freuqnecies per bin, and we know that most burials mounds (616) are located in areas with an elevation between 400 and 500. Now we can calcualte the number of mounds per bin that would be expected if mounds were RANDOMLY located through the landscape. We do so by taking a random sample of mounds from the cropped region and extract their elevation values and examine the distribution of these elevation values to compare with the expected elevation values we found above.  
 
 ```{r}
 set.seed(1) # set seed to get the same values each time we take a sample
 random <- sampleRandom(cropped_aster, 773) # taking a random sample of mounds from the cropped area
-random$elevation = raster::extract(cropped_aster, random) # extracting the elevation values from the random sample
-hist(random$elevation, breaks = breaks) # examining the elevation value distribution for the random sample
-random_freq <- cut(random$elevation, breaks = breaks, dig.lab = 5) # calcuating the expected frequency per bin
-random_freq <- data.frame(table(random_freq)) # converting to a dataframe
+random_elevation = raster::extract(cropped_aster, random) # extracting the elevation values from the random sample
+hist(random_elevation, 
+     breaks = elev_breaks,
+     xlab = "Elevation in meters (m)",
+     main = "Distribution of Elevation Values for Random Sample of Mounds") # examining the elevation value distribution for the random sample
+random_freq <- data.frame(table(cut(random_elevation, breaks = elev_breaks, dig.lab = 5))) # calcuating the expected frequency per bin
 random_freq
 ```
-From the above we can conclude that if the burials mounds were randomly located throughout the landscape, most of them (416) would be located between 500-600 in elevation. Since this distribution does not correspond to what we actually observe, we can infer that the burial mounds are most likely NOT randomly located. 
+
+Let's take a look at the distributions next to each other to compare. 
+```{r}
+par(mfrow=c(1,2)) # 1 row with 2 columns
+
+# Observed mound locations
+hist(mounds$elevation, 
+     breaks = elev_breaks,
+     xlab = "Elevation in meters (m)", 
+     main = "Observed mound locations")
+
+# Random mound locations
+hist(random_elevation, 
+     breaks = elev_breaks,
+     xlab = "Elevation in meters (m)",
+     main = "Random mound location") 
+```
+
+From the above we can conclude that if the burials mounds were randomly located throughout the landscape, most of them (416) would be located between 500-600 meters in elevation, while the elevation distribution we actually observe indicates that most mounds (616) are located between 400-500 meters in elevation. Since there is a discrepancy between the actual elevation values we observe for the mound locations and the elevation distribution for a random sample of location, we could infer that there might be a reason for the placement of the mounds when it comes to elevation.
 
 Now we have looked at elevation to assess the location of burial mounds, and now we turn to look at the slope for the burial mounds and see if this can tell us more about why the burials mounds are located where they are. 
 
@@ -169,56 +161,62 @@ Below we are going to look at the slopes of the burial mounds to see if the slop
 
 First we need to extract the slope values for the burial mounds
 ```{r}
-slopes_cropped <- terrain(cropped_aster, opt = "slope", unit = "degrees") # extracting slopes
-plot(slopes) # simple plot
-plot3D(slopes) # 3D plot
+slopes <- terrain(cropped_aster, opt = "slope", unit = "degrees") # extracting slope values
 ```
 
 Now we can define the bins for the slope values and examine the distribution of mounds according to slope.
 ```{r}
 # Define bins
-breaks <- c(0, 10, 20, 30, 40, 50, 60)
+slope_breaks <- c(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60)
 
-# Extract slope values
-slopes_bins <- cut(values(slopes_cropped), breaks = breaks, dig.lab = 5) # dig.lab = 5 means 5 digits
-slopes_df <- data.frame(table(slopes_bins)) # converting the slope value table into a data frame
-slopes_df
+# Extract slope values from the mounds
+mounds$slope <- raster::extract(slopes, mounds)
 
-# Histogram
-slopes_values <- values(slopes_cropped)
-hist(slopes_values, breaks = breaks)
+# Put the slope values into bins
+slopes_bins_freq <- data.frame(table(cut(mounds$slope, breaks = slope_breaks, dig.lab = 5)))
+slopes_bins_freq
+
+# Examine distribution with a histogram
+hist(mounds$slope, 
+     breaks = slope_breaks,
+     xlab = "Slope in degrees",
+     main = "Distribution of Slope Values for Mounds")
 ```
 
-We can see that most of the burial mounds wihtin the cropped area are located in an area with a slope between 0-10 degress, hence, not very steep. 
-
-Now let's examine the slope for the particular mounds we are interested in:
-```{r}
-mounds$slope <- raster::extract(slopes_cropped, mounds)
-
-# Examine the distribution of elevation values in the cropped area in which the burial mounds are located
-hist(mounds$slope, breaks = breaks)
-
-# Extract the actual frequency
-mounds_freq_slope <- cut(mounds$slope, breaks = breaks, dig.lab = 5)
-mounds_freq_slope <- data.frame(table(mounds_freq_slope))
-mounds_freq_slope
-```
-
-Most burials mounds (728) are located in areas with a slope between 0-10 degrees.
+From the above, we can see that most burials mounds (595) are located in areas with a slope between 0 and 5 degrees.
 
 Now we can calculate the expected number of mounds per bin if the mounds were located randomly through the landscape, and see how this compares to what we actually observe.
-
 ```{r}
 set.seed(1) # set seed to get the same values each time we take a sample
-random <- sampleRandom(cropped_aster, 773) # taking a random sample of mounds from the cropped area
-random$slope <- raster::extract(slopes_cropped, random) # extracting the elevation values from the random sample
-hist(random$slope, breaks = breaks) # examining the elevation value distribution for the random sample
-random_freq <- cut(random$slope, breaks = breaks, dig.lab = 5) # calcuating the expected frequency per bin
-random_freq <- data.frame(table(random_freq)) # converting to a dataframe
+random_slopes <- sampleRandom(slopes, 773) # taking a random sample of mounds from the cropped area
+random_freq <- data.frame(table(cut(random_slopes, breaks = slope_breaks, dig.lab = 5))) # calcuating the expected frequency per bin
 random_freq
+
+# examining the elevation value distribution for the random sample
+hist(random_slopes, 
+     breaks = slope_breaks,
+     xlab = "Slope in degrees",
+     main = "Distribution of Slope Values for Mounds") 
 ```
 
-With a random sample of burial mounds, we can see that most would be located in areas with slopes between 0-10 or between 20-30 degrees. This suggest that it might not be entirely random that the burial mounds in the Kazanlak valley are located in areas with a slope between 0-10, since a random sample also shows that many mounds (16) would be expected to have a slope between 20-30. 
+Let's take a look at the distributions next to each other to compare
+```{r}
+par(mfrow=c(1,2)) # 1 row with 2 columns
+
+# Observed mound locations
+hist(mounds$slope, 
+     breaks = slope_breaks,
+     xlab = "Slope in degrees", 
+     main = "Observed mound locations")
+
+# Random mound locations
+hist(random_slopes, 
+     breaks = slope_breaks,
+     xlab = "Slope in degrees",
+     main = "Random mound ocations") 
+```
+
+For the acutal mound locations the slope varies between 0 and 20 degrees, with most mounds being located in areas with a slope between 0 and 5 degrees, while for random mound locations, the variation is larger and ranges between 0 and 40 degrees with most mounds expected to be located in areas with slopes between 0 and 5 degrees. 
 
 __Conclusion__
 Based on an assessment of common aspects of topographic, elevation and slope, we can conclude that the burial mounds in the Kazanlak Valley are most likely not located randomly, rather, there seems to be particular patterns when it comes to elevation and slope for these particular burials mounds. 
