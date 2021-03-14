@@ -9,7 +9,6 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Adela Sobotkova" />
 
 
 <title>Spatial Segregation: Preston Crime continued</title>
@@ -47,6 +46,15 @@ if (!!window.navigator.userAgent.match("MSIE 8")) {
 !function(a){"use strict";a.matchMedia=a.matchMedia||function(a){var b,c=a.documentElement,d=c.firstElementChild||c.firstChild,e=a.createElement("body"),f=a.createElement("div");return f.id="mq-test-1",f.style.cssText="position:absolute;top:-100em",e.style.background="none",e.appendChild(f),function(a){return f.innerHTML='&shy;<style media="'+a+'"> #mq-test-1 { width: 42px; }</style>',c.insertBefore(e,d),b=42===f.offsetWidth,c.removeChild(e),{matches:b,media:a}}}(a.document)}(this),function(a){"use strict";function b(){u(!0)}var c={};a.respond=c,c.update=function(){};var d=[],e=function(){var b=!1;try{b=new a.XMLHttpRequest}catch(c){b=new a.ActiveXObject("Microsoft.XMLHTTP")}return function(){return b}}(),f=function(a,b){var c=e();c&&(c.open("GET",a,!0),c.onreadystatechange=function(){4!==c.readyState||200!==c.status&&304!==c.status||b(c.responseText)},4!==c.readyState&&c.send(null))};if(c.ajax=f,c.queue=d,c.regex={media:/@media[^\{]+\{([^\{\}]*\{[^\}\{]*\})+/gi,keyframes:/@(?:\-(?:o|moz|webkit)\-)?keyframes[^\{]+\{(?:[^\{\}]*\{[^\}\{]*\})+[^\}]*\}/gi,urls:/(url\()['"]?([^\/\)'"][^:\)'"]+)['"]?(\))/g,findStyles:/@media *([^\{]+)\{([\S\s]+?)$/,only:/(only\s+)?([a-zA-Z]+)\s?/,minw:/\([\s]*min\-width\s*:[\s]*([\s]*[0-9\.]+)(px|em)[\s]*\)/,maxw:/\([\s]*max\-width\s*:[\s]*([\s]*[0-9\.]+)(px|em)[\s]*\)/},c.mediaQueriesSupported=a.matchMedia&&null!==a.matchMedia("only all")&&a.matchMedia("only all").matches,!c.mediaQueriesSupported){var g,h,i,j=a.document,k=j.documentElement,l=[],m=[],n=[],o={},p=30,q=j.getElementsByTagName("head")[0]||k,r=j.getElementsByTagName("base")[0],s=q.getElementsByTagName("link"),t=function(){var a,b=j.createElement("div"),c=j.body,d=k.style.fontSize,e=c&&c.style.fontSize,f=!1;return b.style.cssText="position:absolute;font-size:1em;width:1em",c||(c=f=j.createElement("body"),c.style.background="none"),k.style.fontSize="100%",c.style.fontSize="100%",c.appendChild(b),f&&k.insertBefore(c,k.firstChild),a=b.offsetWidth,f?k.removeChild(c):c.removeChild(b),k.style.fontSize=d,e&&(c.style.fontSize=e),a=i=parseFloat(a)},u=function(b){var c="clientWidth",d=k[c],e="CSS1Compat"===j.compatMode&&d||j.body[c]||d,f={},o=s[s.length-1],r=(new Date).getTime();if(b&&g&&p>r-g)return a.clearTimeout(h),h=a.setTimeout(u,p),void 0;g=r;for(var v in l)if(l.hasOwnProperty(v)){var w=l[v],x=w.minw,y=w.maxw,z=null===x,A=null===y,B="em";x&&(x=parseFloat(x)*(x.indexOf(B)>-1?i||t():1)),y&&(y=parseFloat(y)*(y.indexOf(B)>-1?i||t():1)),w.hasquery&&(z&&A||!(z||e>=x)||!(A||y>=e))||(f[w.media]||(f[w.media]=[]),f[w.media].push(m[w.rules]))}for(var C in n)n.hasOwnProperty(C)&&n[C]&&n[C].parentNode===q&&q.removeChild(n[C]);n.length=0;for(var D in f)if(f.hasOwnProperty(D)){var E=j.createElement("style"),F=f[D].join("\n");E.type="text/css",E.media=D,q.insertBefore(E,o.nextSibling),E.styleSheet?E.styleSheet.cssText=F:E.appendChild(j.createTextNode(F)),n.push(E)}},v=function(a,b,d){var e=a.replace(c.regex.keyframes,"").match(c.regex.media),f=e&&e.length||0;b=b.substring(0,b.lastIndexOf("/"));var g=function(a){return a.replace(c.regex.urls,"$1"+b+"$2$3")},h=!f&&d;b.length&&(b+="/"),h&&(f=1);for(var i=0;f>i;i++){var j,k,n,o;h?(j=d,m.push(g(a))):(j=e[i].match(c.regex.findStyles)&&RegExp.$1,m.push(RegExp.$2&&g(RegExp.$2))),n=j.split(","),o=n.length;for(var p=0;o>p;p++)k=n[p],l.push({media:k.split("(")[0].match(c.regex.only)&&RegExp.$2||"all",rules:m.length-1,hasquery:k.indexOf("(")>-1,minw:k.match(c.regex.minw)&&parseFloat(RegExp.$1)+(RegExp.$2||""),maxw:k.match(c.regex.maxw)&&parseFloat(RegExp.$1)+(RegExp.$2||"")})}u()},w=function(){if(d.length){var b=d.shift();f(b.href,function(c){v(c,b.href,b.media),o[b.href]=!0,a.setTimeout(function(){w()},0)})}},x=function(){for(var b=0;b<s.length;b++){var c=s[b],e=c.href,f=c.media,g=c.rel&&"stylesheet"===c.rel.toLowerCase();e&&g&&!o[e]&&(c.styleSheet&&c.styleSheet.rawCssText?(v(c.styleSheet.rawCssText,e,f),o[e]=!0):(!/^([a-zA-Z:]*\/\/)/.test(e)&&!r||e.replace(RegExp.$1,"").split("/")[0]===a.location.host)&&("//"===e.substring(0,2)&&(e=a.location.protocol+e),d.push({href:e,media:f})))}w()};x(),c.update=x,c.getEmValue=t,a.addEventListener?a.addEventListener("resize",b,!1):a.attachEvent&&a.attachEvent("onresize",b)}}(this);
 };
 </script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script>/*! jQuery UI - v1.11.4 - 2016-01-05
 * http://jqueryui.com
 * Includes: core.js, widget.js, mouse.js, position.js, draggable.js, droppable.js, resizable.js, selectable.js, sortable.js, accordion.js, autocomplete.js, button.js, dialog.js, menu.js, progressbar.js, selectmenu.js, slider.js, spinner.js, tabs.js, tooltip.js, effect.js, effect-blind.js, effect-bounce.js, effect-clip.js, effect-drop.js, effect-explode.js, effect-fade.js, effect-fold.js, effect-highlight.js, effect-puff.js, effect-pulsate.js, effect-scale.js, effect-shake.js, effect-size.js, effect-slide.js, effect-transfer.js
@@ -296,7 +304,7 @@ float: none;
         self._setEventHandlers();
 
         // Binding to the Window load event to make sure the correct scrollTop is calculated
-        $(window).load(function() {
+        $(window).on("load", function() {
 
           // Sets the active TOC item
           self._setActiveElement(true);
@@ -1263,29 +1271,29 @@ window.buildTabsets = function(tocID) {
 };
 
 </script>
-<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
-// v0.0.1
-// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
 
-document.addEventListener('DOMContentLoaded', function() {
-  const codeList = document.getElementsByClassName("sourceCode");
-  for (var i = 0; i < codeList.length; i++) {
-    var linkList = codeList[i].getElementsByTagName('a');
-    for (var j = 0; j < linkList.length; j++) {
-      if (linkList[j].innerHTML === "") {
-        linkList[j].setAttribute('aria-hidden', 'true');
-      }
-    }
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
   }
-});
-</script>
-
-
-<style type="text/css">code{white-space: pre;}</style>
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode { white-space: pre; position: relative; }
 div.sourceCode { margin: 1em 0; }
@@ -1295,16 +1303,14 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
 }
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
+    border: none; pointer-events: all; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -1313,9 +1319,9 @@ pre.numberSource code > span > a:first-child::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  background-color: #f8f8f8; }
+  { background-color: #f8f8f8; }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+a.sourceLine::before { text-decoration: underline; }
 }
 code span.al { color: #ef2929; } /* Alert */
 code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
@@ -1368,39 +1374,9 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
   }
 })();
 </script>
-<style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
 
 
-<style type="text/css">
-h1 {
-  font-size: 34px;
-}
-h1.title {
-  font-size: 38px;
-}
-h2 {
-  font-size: 30px;
-}
-h3 {
-  font-size: 24px;
-}
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
-}
-</style>
+
 
 
 
@@ -1410,10 +1386,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -1430,6 +1402,9 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+pre code {
+  padding: 0;
+}
 </style>
 
 
@@ -1442,7 +1417,6 @@ summary {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -1568,24 +1542,23 @@ div.tocify {
 
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
-<div class="col-xs-12 col-sm-4 col-md-3">
+<div class="row">
+<div class="col-sm-12 col-md-4 col-lg-3">
 <div id="TOC" class="tocify">
 </div>
 </div>
 
-<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+<div class="toc-content col-sm-12 col-md-8 col-lg-9">
 
 
 
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
 <h1 class="title toc-ignore">Spatial Segregation: Preston Crime continued</h1>
-<h4 class="author">Adela Sobotkova</h4>
-<h4 class="date">11/12/2020 updated March 08, 2021</h4>
+<h4 class="date">11/12/2020 updated Marts 14, 2021</h4>
 
 </div>
 
@@ -1607,27 +1580,27 @@ div.tocify {
 <li>Call <code>plotcv()</code> on <code>bw_choice</code>.</li>
 <li>Highlight the best bandwidth by adding a vertical line where the test statistic is maximized.</li>
 </ul>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># Install spatialkernel (the CRAN version is outdated, so you need to grab the most recent maintained version from Github). You may need to install.packages(&quot;devtools&quot;) and then run:</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a>devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;becarioprecario/spatialkernel&quot;</span>)</span>
-<span id="cb1-3"><a href="#cb1-3"></a></span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="co"># Libraries</span></span>
-<span id="cb1-5"><a href="#cb1-5"></a><span class="kw">library</span>(spatstat)</span>
-<span id="cb1-6"><a href="#cb1-6"></a><span class="kw">library</span>(spatialkernel)</span>
-<span id="cb1-7"><a href="#cb1-7"></a></span>
-<span id="cb1-8"><a href="#cb1-8"></a><span class="co"># Data</span></span>
-<span id="cb1-9"><a href="#cb1-9"></a>preston_crime &lt;-<span class="st"> </span><span class="kw">________</span>(<span class="st">&quot;data/pcrime-spatstat.rds&quot;</span>)</span>
-<span id="cb1-10"><a href="#cb1-10"></a></span>
-<span id="cb1-11"><a href="#cb1-11"></a><span class="co"># Scan from 500m to 1000m in steps of 50m</span></span>
-<span id="cb1-12"><a href="#cb1-12"></a>bw_choice &lt;-<span class="st"> </span><span class="kw">spseg</span>(</span>
-<span id="cb1-13"><a href="#cb1-13"></a>    preston_crime, </span>
-<span id="cb1-14"><a href="#cb1-14"></a>    <span class="dt">h =</span> <span class="kw">seq</span>(___, ___, <span class="dt">by =</span> ___),</span>
-<span id="cb1-15"><a href="#cb1-15"></a>    <span class="dt">opt =</span> <span class="dv">1</span>)</span>
-<span id="cb1-16"><a href="#cb1-16"></a></span>
-<span id="cb1-17"><a href="#cb1-17"></a><span class="co"># Plot the results and highlight the best bandwidth</span></span>
-<span id="cb1-18"><a href="#cb1-18"></a><span class="kw">plotcv</span>(bw_choice); <span class="kw">abline</span>(<span class="dt">v =</span> bw_choice<span class="op">$</span>___, <span class="dt">lty =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>)</span>
-<span id="cb1-19"><a href="#cb1-19"></a></span>
-<span id="cb1-20"><a href="#cb1-20"></a><span class="co"># Print the best bandwidth</span></span>
-<span id="cb1-21"><a href="#cb1-21"></a><span class="kw">print</span>(bw_choice<span class="op">$</span>___)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># Install spatialkernel (the CRAN version is outdated, so you need to grab the most recent maintained version from Github). You may need to install.packages(&quot;devtools&quot;) and then run:</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;becarioprecario/spatialkernel&quot;</span>)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co"># Libraries</span></a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="kw">library</span>(spatstat)</a>
+<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="kw">library</span>(spatialkernel)</a>
+<a class="sourceLine" id="cb1-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="co"># Data</span></a>
+<a class="sourceLine" id="cb1-9" data-line-number="9">preston_crime &lt;-<span class="st"> </span><span class="kw">readRDS</span>(<span class="st">&quot;data/pcrime-spatstat.rds&quot;</span>)</a>
+<a class="sourceLine" id="cb1-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb1-11" data-line-number="11"><span class="co"># Scan from 500m to 1000m in steps of 50m</span></a>
+<a class="sourceLine" id="cb1-12" data-line-number="12">bw_choice &lt;-<span class="st"> </span><span class="kw">spseg</span>(</a>
+<a class="sourceLine" id="cb1-13" data-line-number="13">    preston_crime, </a>
+<a class="sourceLine" id="cb1-14" data-line-number="14">    <span class="dt">h =</span> <span class="kw">seq</span>(<span class="dv">500</span>, <span class="dv">1000</span>, <span class="dt">by =</span> <span class="dv">50</span>),</a>
+<a class="sourceLine" id="cb1-15" data-line-number="15">    <span class="dt">opt =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb1-16" data-line-number="16"></a>
+<a class="sourceLine" id="cb1-17" data-line-number="17"><span class="co"># Plot the results and highlight the best bandwidth</span></a>
+<a class="sourceLine" id="cb1-18" data-line-number="18"><span class="kw">plotcv</span>(bw_choice); <span class="kw">abline</span>(<span class="dt">v =</span> bw_choice<span class="op">$</span>hcv, <span class="dt">lty =</span> <span class="dv">2</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>)</a>
+<a class="sourceLine" id="cb1-19" data-line-number="19"></a>
+<a class="sourceLine" id="cb1-20" data-line-number="20"><span class="co"># Print the best bandwidth</span></a>
+<a class="sourceLine" id="cb1-21" data-line-number="21"><span class="kw">print</span>(bw_choice<span class="op">$</span>hcv) <span class="co"># 800</span></a></code></pre></div>
 <p>Amazing! Now you know the optimal smoothing parameter, you can do some kernel smoothing simulations.</p>
 </div>
 </div>
@@ -1644,20 +1617,20 @@ div.tocify {
 <li>Run the function for 10 simulations only via the <code>ntest</code> parameter.</li>
 <li>The output consists of probability maps for each class in the marks of the data. Plot the map for the violent crimes. Add “Violent crime” as the title to your plots.</li>
 </ul>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># Set the correct bandwidth and run for 10 simulations only</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a>seg10 &lt;-<span class="st"> </span><span class="kw">spseg</span>(</span>
-<span id="cb2-3"><a href="#cb2-3"></a>    <span class="dt">pts =</span> preston_crime, </span>
-<span id="cb2-4"><a href="#cb2-4"></a>    <span class="dt">h =</span> ___,</span>
-<span id="cb2-5"><a href="#cb2-5"></a>    <span class="dt">opt =</span> <span class="dv">3</span>,</span>
-<span id="cb2-6"><a href="#cb2-6"></a>    <span class="dt">ntest =</span> ___, </span>
-<span id="cb2-7"><a href="#cb2-7"></a>    <span class="dt">proc =</span> <span class="ot">FALSE</span>)</span>
-<span id="cb2-8"><a href="#cb2-8"></a><span class="co"># Plot the segregation map for violent crime</span></span>
-<span id="cb2-9"><a href="#cb2-9"></a><span class="kw">plotmc</span>(seg10, <span class="st">&quot;___&quot;</span>)</span>
-<span id="cb2-10"><a href="#cb2-10"></a></span>
-<span id="cb2-11"><a href="#cb2-11"></a><span class="co"># You can modify the script above to run 1000 simulations if you have 20 mins of time. Alternatively, load the &#39;seg&#39; object from data/.</span></span>
-<span id="cb2-12"><a href="#cb2-12"></a>seg &lt;-<span class="st"> </span><span class="kw">__</span>(_____)</span>
-<span id="cb2-13"><a href="#cb2-13"></a><span class="co"># Plot seg, the result of running 1000 simulations</span></span>
-<span id="cb2-14"><a href="#cb2-14"></a><span class="kw">plotmc</span>(seg, <span class="st">&quot;___&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># Set the correct bandwidth and run for 10 simulations only</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">seg10 &lt;-<span class="st"> </span><span class="kw">spseg</span>(</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">    <span class="dt">pts =</span> preston_crime, </a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">    <span class="dt">h =</span> bw_choice<span class="op">$</span>hcv,</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">    <span class="dt">opt =</span> <span class="dv">3</span>,</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6">    <span class="dt">ntest =</span> <span class="dv">10</span>, </a>
+<a class="sourceLine" id="cb2-7" data-line-number="7">    <span class="dt">proc =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="co"># Plot the segregation map for violent crime</span></a>
+<a class="sourceLine" id="cb2-9" data-line-number="9"><span class="kw">plotmc</span>(seg10, <span class="st">&quot;Violent crime&quot;</span>)</a>
+<a class="sourceLine" id="cb2-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb2-11" data-line-number="11"><span class="co"># You can modify the script above to run 1000 simulations if you have 20 mins of time. Alternatively, load the 'seg' object from data/.</span></a>
+<a class="sourceLine" id="cb2-12" data-line-number="12">seg &lt;-<span class="st"> </span><span class="kw">readRDS</span>(<span class="st">&quot;data/seg.rds&quot;</span>)</a>
+<a class="sourceLine" id="cb2-13" data-line-number="13"><span class="co"># Plot seg, the result of running 1000 simulations</span></a>
+<a class="sourceLine" id="cb2-14" data-line-number="14"><span class="kw">plotmc</span>(seg, <span class="st">&quot;Violent crime&quot;</span>)</a></code></pre></div>
 <p>Good work! The simulation shows that crime is relatively more violent in the town centre and South Western edge.</p>
 </div>
 </div>
@@ -1684,53 +1657,53 @@ div.tocify {
 <li>Create <code>p_value</code> as in the previous step, except that the <code>z</code> element is logical, and <code>TRUE</code> when the <code>stpvalue</code> element of seg is less than 0.05.</li>
 <li>Call the <code>segmap()</code> function shown in the script to find areas where the probability of a crime being violent is above 0.15. Use 0.05 as the lower probability.</li>
 </ul>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># Inspect the structure of the spatial segregation object</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a><span class="kw">str</span>(___)</span>
-<span id="cb3-3"><a href="#cb3-3"></a></span>
-<span id="cb3-4"><a href="#cb3-4"></a><span class="co"># Get the number of columns in the data so we can rearrange to a grid</span></span>
-<span id="cb3-5"><a href="#cb3-5"></a>ncol &lt;-<span class="st"> </span><span class="kw">length</span>(seg<span class="op">$</span>___)</span>
-<span id="cb3-6"><a href="#cb3-6"></a></span>
-<span id="cb3-7"><a href="#cb3-7"></a><span class="co"># Rearrange the probability column into a grid</span></span>
-<span id="cb3-8"><a href="#cb3-8"></a>prob_violent &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">x =</span> seg<span class="op">$</span>___,</span>
-<span id="cb3-9"><a href="#cb3-9"></a>                     <span class="dt">y =</span> seg<span class="op">$</span>___,</span>
-<span id="cb3-10"><a href="#cb3-10"></a>                     <span class="dt">z =</span> <span class="kw">matrix</span>(seg<span class="op">$</span>___[, <span class="st">&quot;Violent crime&quot;</span>],</span>
-<span id="cb3-11"><a href="#cb3-11"></a>                                <span class="dt">ncol =</span> ncol))</span>
-<span id="cb3-12"><a href="#cb3-12"></a><span class="co"># You have basically georeferenced the image within data&#39;s coordinates</span></span>
-<span id="cb3-13"><a href="#cb3-13"></a><span class="kw">image</span>(prob_violent)</span>
-<span id="cb3-14"><a href="#cb3-14"></a></span>
-<span id="cb3-15"><a href="#cb3-15"></a><span class="co"># Rearrange the p-values, but choose a p-value threshold</span></span>
-<span id="cb3-16"><a href="#cb3-16"></a>p_value &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">x =</span> seg<span class="op">$</span>___,</span>
-<span id="cb3-17"><a href="#cb3-17"></a>                <span class="dt">y =</span> seg<span class="op">$</span>___,</span>
-<span id="cb3-18"><a href="#cb3-18"></a>                <span class="dt">z =</span> <span class="kw">matrix</span>(seg<span class="op">$</span>___[, <span class="st">&quot;Violent crime&quot;</span>]<span class="op">&lt;</span><span class="st"> </span><span class="fl">0.05</span>,</span>
-<span id="cb3-19"><a href="#cb3-19"></a>                                <span class="dt">ncol =</span> ncol))</span>
-<span id="cb3-20"><a href="#cb3-20"></a><span class="kw">image</span>(p_value)</span>
-<span id="cb3-21"><a href="#cb3-21"></a></span>
-<span id="cb3-22"><a href="#cb3-22"></a></span>
-<span id="cb3-23"><a href="#cb3-23"></a><span class="co"># Create a mapping function</span></span>
-<span id="cb3-24"><a href="#cb3-24"></a>segmap &lt;-<span class="st"> </span><span class="cf">function</span>(prob_list, pv_list, low, high){</span>
-<span id="cb3-25"><a href="#cb3-25"></a></span>
-<span id="cb3-26"><a href="#cb3-26"></a>  <span class="co"># background map</span></span>
-<span id="cb3-27"><a href="#cb3-27"></a>  <span class="kw">library</span>(raster)</span>
-<span id="cb3-28"><a href="#cb3-28"></a>  preston_osm &lt;-<span class="st"> </span><span class="kw">______</span>(<span class="st">&quot;data/osm_preston_gray.rds&quot;</span>)</span>
-<span id="cb3-29"><a href="#cb3-29"></a>  <span class="kw">plotRGB</span>(preston_osm)</span>
-<span id="cb3-30"><a href="#cb3-30"></a></span>
-<span id="cb3-31"><a href="#cb3-31"></a>  <span class="co"># p-value areas</span></span>
-<span id="cb3-32"><a href="#cb3-32"></a>  <span class="kw">image</span>(pv_list, </span>
-<span id="cb3-33"><a href="#cb3-33"></a>        <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;#00000000&quot;</span>, <span class="st">&quot;#FF808080&quot;</span>), <span class="dt">add =</span> <span class="ot">TRUE</span>) </span>
-<span id="cb3-34"><a href="#cb3-34"></a></span>
-<span id="cb3-35"><a href="#cb3-35"></a>  <span class="co"># probability contours</span></span>
-<span id="cb3-36"><a href="#cb3-36"></a>  <span class="kw">contour</span>(prob_list,</span>
-<span id="cb3-37"><a href="#cb3-37"></a>          <span class="dt">levels =</span> <span class="kw">c</span>(low, high),</span>
-<span id="cb3-38"><a href="#cb3-38"></a>          <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;#206020&quot;</span>, <span class="st">&quot;red&quot;</span>),</span>
-<span id="cb3-39"><a href="#cb3-39"></a>          <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&quot;Low&quot;</span>, <span class="st">&quot;High&quot;</span>),</span>
-<span id="cb3-40"><a href="#cb3-40"></a>          <span class="dt">add =</span> <span class="ot">TRUE</span>)</span>
-<span id="cb3-41"><a href="#cb3-41"></a></span>
-<span id="cb3-42"><a href="#cb3-42"></a>  <span class="co"># boundary window</span></span>
-<span id="cb3-43"><a href="#cb3-43"></a>  <span class="kw">plot</span>(<span class="kw">Window</span>(preston_crime), <span class="dt">add =</span> <span class="ot">TRUE</span>)</span>
-<span id="cb3-44"><a href="#cb3-44"></a>}</span>
-<span id="cb3-45"><a href="#cb3-45"></a></span>
-<span id="cb3-46"><a href="#cb3-46"></a><span class="co"># Map the probability and p-value</span></span>
-<span id="cb3-47"><a href="#cb3-47"></a><span class="kw">segmap</span>(prob_violent, p_value, ___, ___)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># Inspect the structure of the spatial segregation object</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw">str</span>(seg)</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="co"># Get the number of columns in the data so we can rearrange to a grid</span></a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">ncol &lt;-<span class="st"> </span><span class="kw">length</span>(seg<span class="op">$</span>gridx)</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb3-7" data-line-number="7"><span class="co"># Rearrange the probability column into a grid</span></a>
+<a class="sourceLine" id="cb3-8" data-line-number="8">prob_violent &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">x =</span> seg<span class="op">$</span>gridx,</a>
+<a class="sourceLine" id="cb3-9" data-line-number="9">                     <span class="dt">y =</span> seg<span class="op">$</span>gridy,</a>
+<a class="sourceLine" id="cb3-10" data-line-number="10">                     <span class="dt">z =</span> <span class="kw">matrix</span>(seg<span class="op">$</span>p[, <span class="st">&quot;Violent crime&quot;</span>],</a>
+<a class="sourceLine" id="cb3-11" data-line-number="11">                                <span class="dt">ncol =</span> ncol))</a>
+<a class="sourceLine" id="cb3-12" data-line-number="12"><span class="co"># You have basically georeferenced the image within data's coordinates</span></a>
+<a class="sourceLine" id="cb3-13" data-line-number="13"><span class="kw">image</span>(prob_violent)</a>
+<a class="sourceLine" id="cb3-14" data-line-number="14"></a>
+<a class="sourceLine" id="cb3-15" data-line-number="15"><span class="co"># Rearrange the p-values, but choose a p-value threshold</span></a>
+<a class="sourceLine" id="cb3-16" data-line-number="16">p_value &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">x =</span> seg<span class="op">$</span>gridx,</a>
+<a class="sourceLine" id="cb3-17" data-line-number="17">                <span class="dt">y =</span> seg<span class="op">$</span>gridy,</a>
+<a class="sourceLine" id="cb3-18" data-line-number="18">                <span class="dt">z =</span> <span class="kw">matrix</span>(seg<span class="op">$</span>p[, <span class="st">&quot;Violent crime&quot;</span>]<span class="op">&lt;</span><span class="st"> </span><span class="fl">0.05</span>,</a>
+<a class="sourceLine" id="cb3-19" data-line-number="19">                                <span class="dt">ncol =</span> ncol))</a>
+<a class="sourceLine" id="cb3-20" data-line-number="20"><span class="kw">image</span>(p_value)</a>
+<a class="sourceLine" id="cb3-21" data-line-number="21"></a>
+<a class="sourceLine" id="cb3-22" data-line-number="22"></a>
+<a class="sourceLine" id="cb3-23" data-line-number="23"><span class="co"># Create a mapping function</span></a>
+<a class="sourceLine" id="cb3-24" data-line-number="24">segmap &lt;-<span class="st"> </span><span class="cf">function</span>(prob_list, pv_list, low, high){</a>
+<a class="sourceLine" id="cb3-25" data-line-number="25"></a>
+<a class="sourceLine" id="cb3-26" data-line-number="26">  <span class="co"># background map</span></a>
+<a class="sourceLine" id="cb3-27" data-line-number="27">  <span class="kw">library</span>(raster)</a>
+<a class="sourceLine" id="cb3-28" data-line-number="28">  preston_osm &lt;-<span class="st"> </span><span class="kw">readRDS</span>(<span class="st">&quot;data/osm_preston_gray.rds&quot;</span>)</a>
+<a class="sourceLine" id="cb3-29" data-line-number="29">  <span class="kw">plotRGB</span>(preston_osm)</a>
+<a class="sourceLine" id="cb3-30" data-line-number="30"></a>
+<a class="sourceLine" id="cb3-31" data-line-number="31">  <span class="co"># p-value areas</span></a>
+<a class="sourceLine" id="cb3-32" data-line-number="32">  <span class="kw">image</span>(pv_list, </a>
+<a class="sourceLine" id="cb3-33" data-line-number="33">        <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;#00000000&quot;</span>, <span class="st">&quot;#FF808080&quot;</span>), <span class="dt">add =</span> <span class="ot">TRUE</span>) </a>
+<a class="sourceLine" id="cb3-34" data-line-number="34"></a>
+<a class="sourceLine" id="cb3-35" data-line-number="35">  <span class="co"># probability contours</span></a>
+<a class="sourceLine" id="cb3-36" data-line-number="36">  <span class="kw">contour</span>(prob_list,</a>
+<a class="sourceLine" id="cb3-37" data-line-number="37">          <span class="dt">levels =</span> <span class="kw">c</span>(low, high),</a>
+<a class="sourceLine" id="cb3-38" data-line-number="38">          <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;#206020&quot;</span>, <span class="st">&quot;red&quot;</span>),</a>
+<a class="sourceLine" id="cb3-39" data-line-number="39">          <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&quot;Low&quot;</span>, <span class="st">&quot;High&quot;</span>),</a>
+<a class="sourceLine" id="cb3-40" data-line-number="40">          <span class="dt">add =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb3-41" data-line-number="41"></a>
+<a class="sourceLine" id="cb3-42" data-line-number="42">  <span class="co"># boundary window</span></a>
+<a class="sourceLine" id="cb3-43" data-line-number="43">  <span class="kw">plot</span>(<span class="kw">Window</span>(preston_crime), <span class="dt">add =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb3-44" data-line-number="44">}</a>
+<a class="sourceLine" id="cb3-45" data-line-number="45"></a>
+<a class="sourceLine" id="cb3-46" data-line-number="46"><span class="co"># Map the probability and p-value</span></a>
+<a class="sourceLine" id="cb3-47" data-line-number="47"><span class="kw">segmap</span>(prob_violent, p_value, <span class="fl">0.05</span>, <span class="fl">0.15</span>)</a></code></pre></div>
 <p>Great work! By displaying the violent crime areas on the map, it’s really easy to understand where the problem areas are.</p>
 </div>
 </div>
@@ -1746,7 +1719,7 @@ div.tocify {
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -1764,7 +1737,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>
