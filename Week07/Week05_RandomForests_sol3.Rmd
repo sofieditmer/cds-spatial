@@ -27,20 +27,19 @@ This dataset has the following limitations:
 Specify your approach and elaborate your solution here:
 ```{r}
 library(raster)
-library(sp)
-library(raster)
 library(sf)
 ```
 
 Let's load the IKONOS imagery (multiband)
 ```{r}
 # East first
-kaze <-brick("data/KazE.tif")
-plotRGB(kaze, stretch= "lin")
+kaze <- brick("data/KazE.tif")
+plotRGB(kaze, stretch = "lin") # we need to stretch it so it fits into the spectrum
 
 # West next
 kazw <-brick("data/KazW.tif")
-plotRGB(kazw, stretch= "lin") # check what it looks like
+plotRGB(kazw, stretch = "his") # stretch = hist (more contrast)
+plotRGB(kazw, stretch = "lin") 
 ```
 
 Review the attributes and their correlation
@@ -52,21 +51,37 @@ hist(kazw)
 # Rescale histograms to be consistent
 par(mfrow = c(1, 1)) # reset plotting window
 hist(kazw, xlim = c(0, 1600), ylim = c(0, 50000), breaks = seq(0, 1500, by = 100))
+# Band number 4 is the near-infrared
 ```
+
+We can look at the pairs: 
 ```{r}
 pairs(kazw)
 pairs(kaze)
+# We can see that the green and blue are correlated. There is less correlation with the near-infrared. 
 ```
-Now, let's calculate the NDVI using raster algebra or overlay
+Now, let's calculate the NDVI (showing vegetation health) using raster algebra or overlay
 ```{r}
 # Extract bands 3 and 4 (Red and Near-Infrared)
-kaze3 <- kaze[[3]]
-kaze4 <- kaze[[4]]
-ndvi <-  overlay(kaze4, kaze3, fun=function(x,y){(x-y)/(x+y)})
+kaze3 <- kaze[[3]] # extracting band 3
+kaze4 <- kaze[[4]] # extracting band 4
+
+# Calculating NDVI
+ndvi <-  overlay(kaze4, kaze3, fun=function(x,y){(x-y)/(x+y)}) # we use the overlay function to calculate NDVI (we could also just have used raster algebra but this is slower)
+
 plot(ndvi)
+# Values below 0 (white): water, i.e. reservoirs, lakes etc.
+
+# Around 0 (yellow): fields with no vegetation
+
+# Green: fields with crops and/or forest
+
+# Look at histogram
 hist(ndvi)
 minValue(ndvi)
 ```
+
+
 ```{r}
 # Reclassify if subzero values bother you
 mat <- cbind(-0.8,0,0)
@@ -80,37 +95,38 @@ Branches represent nodes of the decision trees, which are often thresholds defin
 
 Skipping Vegetation Continuous Field (VCF) , we can try with bands 2,3,4,ndvi
 ```{r}
+# Creating a new brick out of all the layers we are interested in (green, red, near-infra, nvdi, and reclassified nvdi_0)
 kaze2 <- kaze[[2]]
 covs <- brick(kaze2,kaze3,kaze4,ndvi, nvdi_0)
 plot(covs)
+# Here we can see the layers in the brick we have just made
 ```
-Relabel all the layers, especially the NDVI for later easy interpretation
 
+Relabel all the layers, especially the NDVI for later easy interpretation
 ```{r}
 names(covs) <- c("band2", "band3", "band4", "NDVI", "NDVI0")
 plot(covs)
-
 ```
+
 ## Unsupervised Classification with kmeans
-Before the random forest, let's check what an unsupervised classification can do, so we can see how much (little) random forest improves on it.
+Before the random forest, let's check what an unsupervised classification can do, so we can see how much (little) random forest improves on it. We do this in order to have something to compare the random forest with. 
 ```{r}
 kaz_df <- as.data.frame(covs)  
 set.seed(99)
 cluster_kaz <- kmeans(kaz_df, 5) ### kmeans, with 5 clusters
 str(cluster_kaz)
-
 ```
 
 Now, convert the dataframe with cluster information into a raster for plotting with raster() and setValues() functions.
 ```{r}
-clusters <- raster(covs)   ## create an empty raster with same extent than kaz
+clusters <- raster(covs)   ## create an empty raster with same extent as kaz
 clusters <- setValues(clusters, cluster_kaz$cluster) # convert cluster values into raster
 clusters
 plot(clusters)
 plot(clusters,col=c("dark green", "brown", "blue", "grey","green"))
+# Now we can see forest, soil, cities, water etc. in the colors we have specified. 
 ```
 The result is actually pretty good, with water, forest and the bare/urban areas coming clearly out. Water is most differentiated, forest and urban areas a bit mixed, but still outlined. Cropland is a mess, because it combines bare harrowed fields as well as seedlings and young crops and so multiple signatures will need to be fused here.
-
 
 # Back to Supervised Classification
 
@@ -119,7 +135,7 @@ Let us do a classification for 2001 using five classes: forest, bare surface, cr
 ```{r}
 ## Load the training polygons as a simple features object
 library(sf)
-trainingPoly <- st_read("data/Classification/kaz_training_aggr.shp")
+trainingPoly <- st_read("data/Classification/kaz_training_aggr.shp") # we need a trainning dataset on which we can train.
 ## Superimpose training polygons onto NDVI plot
 plot(ndvi)
 plot(trainingPoly, add = TRUE)
@@ -137,8 +153,8 @@ trainingPoly
 To train the raster data, we need to convert training polygons to the same type, using rasterize(). 
 ```{r}
 ## Assign 'Class' values to raster cells (where they overlap)
-classes <- rasterize(trainingPoly, ndvi, field='Class')
-plot(classes)
+classes <- rasterize(trainingPoly, ndvi, field='Class') # here we are rasterizing 
+plot(classes) # this is a raster
 
 ## Plotting
 # Define a colour scale for the classes (as above)
@@ -153,6 +169,7 @@ legend("topright", legend=c("water", "urban","meadow","bareground","forest", "se
 The goal in preprocessing these data is to have a table of values representing all layers (covariates) with known values/classes. To do this, we will first need to create a version of our RasterBrick only representing the training pixels. Here, we use the mask() function from the raster package.
 
 ```{r}
+# Now we mask the image, to see what reflectance is behind the polygon
 covmasked <- mask(covs, classes)
 plot(covmasked)
 ```

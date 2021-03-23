@@ -32,7 +32,6 @@ First load the packages necessary for spatial data visualisation and analysis.
 library(sf)
 library(tidyverse)
 library(spatstat)
-library(spatialkernel)
 library(googlesheets4)
 library(leaflet)
 ```
@@ -51,14 +50,16 @@ suburbs$id
 Next attach the attribute data. 
 I read the data from a google sheet where my colleagues and I can edit it. You can load it from there if you have a googlesheets4 package installed, or use the wc.csv in the data folder
 ```{r read-wc}
+# LOAD DATA FROM GOOGLEDRIVE
 # Uncomment the lines below to read data from GDrive
 # wc <- read_sheet("https://docs.google.com/spreadsheets/d/1iFvycp6M6bF8GBkGjA2Yde2yCIhiy5_slAkGF-RUF7w/edit#gid=0",
 #                     col_types = "cnnnnnnnn") # here we hard code what we want (c = character, n = numeric)
 # write_csv(wc, "data/wc.csv")
+
+# OR LOAD FROM DATA FOLDER
 wc <- read_csv("data/wc.csv")
 wc
 # NB! "Flats" is a proxy for the number of households in the suburb
-
 # Now we have the spatial attributes 
 ```
 
