@@ -1,0 +1,259 @@
+---
+title: 'Homework_week8: Autocorrelation and Danish single people in 2020'
+output: word_document
+---
+
+Description of task: Test for the autocorrelation of the distribution of single women OR single men in Denmark during 2020, and answer the question: "Is the population of single women/men in Denmark spatially correlated? What is the correlation and how significant is the trend?
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+__Packages__
+```{r libraries, include=TRUE}
+library(raster)
+library(rgeos)
+library(sf)
+library(tidyverse)
+library(htmltools)
+library(googlesheets4)
+library(mapview)
+library(tmap)
+library(cartogram)
+library(spdep)
+```
+
+__Load spatial data__
+First we need some spatial data for Danish municipalities
+```{r load-spdata, include=TRUE}
+# Load Danish municipalities data as spatial dataframe
+mun_sp <- readRDS("data/gadm36_DNK_2_sp.rds") 
+
+# Convert spatial dataframe to sf-object 
+mun_sf <- st_as_sf(mun_sp)
+
+# Transform to the Danish UTM projection
+mun <- st_transform(mun_sf, crs = 32632)
+
+# View
+mapview(mun)
+
+# Inspect the names of the municipalities
+sort(mun$NAME_2)
+
+# Because some of the municipalities are not spelled in the same way we need to correct that  
+which(grepl("Å", mun$NAME_2)) # Get the municipalities starting with "Å"
+which(grepl("Vest", mun$NAME_2)) # Get the municipalities starting with "Vest"
+
+# Make sure the names are consistent
+mun$NAME_2[31] <- "Aarhus"
+mun$NAME_2[21] <- "Høje-Taastrup"
+mun$NAME_2[60] <- "Vesthimmerlands"
+```
+
+__Load attributes and join with spatial data__
+Below I calculate the total number of men and women in each municipality as well as the percentages for single men and women.
+```{r spatial attributes, include=TRUE}
+# Load civil status data 
+DK_civilstatus <- read_csv("data/DK_civilstatus.csv")
+
+# Remove NAs
+DK_civilstatus <- na.omit(DK_civilstatus)
+
+# Calculate the total number of men and women in each municipality
+DK_civilstatus %>% 
+  group_by(Region) %>% 
+  summarize(sum2015 = sum(Y2015K1),
+            sum2016 = sum(Y2016K1),
+            sum2017 = sum(Y2017K1),
+            sum2018 = sum(Y2018K1),
+            sum2019 = sum(Y2019K1),
+            sum2020 = sum(Y2020K1))
+
+# Calculate total number of single men and women in each municipality
+DK_region <- DK_civilstatus %>%
+  group_by(Region) %>% 
+  summarize(sum2015 = sum(Y2015K1),
+            sum2016 = sum(Y2016K1),
+            sum2017 = sum(Y2017K1),
+            sum2018 = sum(Y2018K1),
+            sum2019 = sum(Y2019K1),
+            sum2020 = sum(Y2020K1))
+
+# Before I merge the civil status data with the spatial polygons, I need to make sure that they have the same municipalities
+# First I need to find which regions are in the civil status data but not in the spatial data
+no_match <- subset(DK_civilstatus, !(Region %in% mun$NAME_2))
+list_no_match <- unique(no_match$Region)
+list_no_match
+
+# Now that I know which regions are not shared, I can remove them
+# Remove municipalities that are not shared
+DK_civilstatus <- subset(DK_civilstatus, DK_civilstatus$Region != "Region Syddanmark" & DK_civilstatus$Region != "Region Midtjylland" & DK_civilstatus$Region != "Region Nordjylland" & DK_civilstatus$Region != "Region Hovedstaden" & DK_civilstatus$Region != "Region Sjælland")
+
+# Merge the relationship data with the spatial polygons
+DK_single_spatial <- mun %>% 
+  dplyr::select(NAME_2) %>% # name_2 = region (municipalities)
+  merge(DK_civilstatus, by.x = "NAME_2",by.y ="Region") %>%
+  merge(DK_region, by.x = "NAME_2", by.y ="Region") %>% 
+  group_by(NAME_2, Sex) %>%
+  filter(Status == "Ugift") %>%
+  mutate(pct_single2015 = Y2015K1/sum2015*100,
+         pct_single2016 = Y2016K1/sum2016*100,
+         pct_single2017 = Y2017K1/sum2017*100,
+         pct_single2018 = Y2018K1/sum2018*100,
+         pct_single2019 = Y2019K1/sum2019*100,
+         pct_single2020 = Y2020K1/sum2020*100)
+```
+
+__Examine the distribution of single men and women in 2015 to 2020__
+Let's take a look at the data. Let's visualize the percentage of single men and women distributed across municipalities in Denmark from 2015 to 2020
+```{r map-data, include=TRUE}
+# Distribution of single Danish people across Denmark in 2015
+DK_single_spatial %>% 
+  filter(grepl("^M|^K", Sex)) %>% 
+  tm_shape() + 
+  tm_facets("Sex", ncol = 2) +
+  tm_polygons("pct_single2015",
+              title = "Percentage of single people in 2015")
+
+# Distribution of single Danish people across Denmark in 2016
+DK_single_spatial %>% 
+  filter(grepl("^M|^K", Sex)) %>% 
+  tm_shape() + 
+  tm_facets("Sex", ncol = 2) +
+  tm_polygons("pct_single2016",
+              title = "Percentage of single people in 2016")
+
+# Distribution of single Danish people across Denmark in 2017
+DK_single_spatial %>% 
+  filter(grepl("^M|^K", Sex)) %>% 
+  tm_shape() + 
+  tm_facets("Sex", ncol = 2) +
+  tm_polygons("pct_single2017",
+              title = "Percentage of single people in 2017")
+
+# Distribution of single Danish people across Denmark in 2018
+DK_single_spatial %>% 
+  filter(grepl("^M|^K", Sex)) %>% 
+  tm_shape() + 
+  tm_facets("Sex", ncol = 2) +
+  tm_polygons("pct_single2018",
+              title = "Percentage of single people in 2018")
+
+# Distribution of single Danish people across Denmark in 2019
+DK_single_spatial %>% 
+  filter(grepl("^M|^K", Sex)) %>% 
+  tm_shape() + 
+  tm_facets("Sex", ncol = 2) +
+  tm_polygons("pct_single2019",
+              title = "Percentage of single people in 2019")
+
+# Distribution of single Danish people across Denmark in 2020
+DK_single_spatial %>% 
+  filter(grepl("^M|^K", Sex)) %>% 
+  tm_shape() + 
+  tm_facets("Sex", ncol = 2) +
+  tm_polygons("pct_single2020",
+              title = "Percentage of single people in 2020")
+```
+To get a better insight into the distribution of single people across Denmark we can make a cartogram that makes each region proportional to its population.
+
+__Cartogram__
+```{r cartogram-DF, echo=TRUE}
+# Create subset for single women
+DK_single_women <- DK_single_spatial %>%
+  filter(Sex == "Kvinder")
+
+# Create subset for single men
+DK_single_men <- DK_single_spatial %>%
+  filter(Sex == "Mænd")
+
+# Make a scatterplot showing the percentage of singles in 2020 on the x-axis and the size of the municipality on the y-axis 
+plot(DK_single_women$pct_single2020, st_area(DK_single_women, byid = TRUE)) # women
+plot(DK_single_men$pct_single2020, st_area(DK_single_men, byid = TRUE)) # men
+
+# There is a lot of variation for both men and women. Making a cartogram can help to reduce this variation.
+
+# Make a cartogram that scales the size of the municipality to the percentage of single women and men
+cartogram_women_2020_pct <- cartogram_cont(DK_single_women, "pct_single2020") # women 
+cartogram_men_2020_pct <- cartogram_cont(DK_single_men, "pct_single2020") # men
+
+# Now check the linearity of the plots
+plot(cartogram_women_2020_pct$pct_single2020, st_area(cartogram_women_2020_pct, byid = TRUE)) # women
+plot(cartogram_men_2020_pct$pct_single2020, st_area(cartogram_men_2020_pct, byid = TRUE)) # men
+
+# The variation has been eliminated resulting in a much more linear relationship between the percentage of single people and the size of the municipalities for both men and women, because we have scaled the size of the municipality to the percentage of single people.
+
+# Plotting Cartograms
+# Women
+plot(cartogram_women_2020_pct$geometry,
+     col = "green",
+     main = "% of single women in 2020 adjusted to the size of DK municipalities")
+
+# Men
+plot(cartogram_men_2020_pct$geometry,
+     col = "yellow",
+     main = "% of single men in 2020 adjusted to the size of DK municipalities")
+```
+With the cartograms we now have a much better insight into the distribution of single people across Denmark in 2020, because we have taken the size of the municipalities into account. 
+
+Now we can test for autocorrelation, i.e. testing whether neighboring municipalities are more similar in terms of their distribution of single men and women in 2020 compared to randomly selected municipalities.
+
+__Spatial autocorrelation test__
+```{r spatialcorrelation, include=TRUE}
+# First we need to define the neigboring municipalities.
+
+# Simplify the municipalities with a tolerance of 250
+mun_sm <- st_cast(st_simplify(mun, dTolerance = 250),
+                     to = "MULTIPOLYGON")
+# Plot
+plot(mun_sm$geometry)
+
+# Defining neigboring municipalities according to adjacency (toucing borders)
+nb <- poly2nb(mun_sm$geometry) 
+nb
+# Now we have a list of all neighboring municipalities. We can see that there are 8 regions with no neighbors (these are the islands). This might have some implications for the weighted matrix we make later and consequently Moran's I.
+
+# Get center points of each municipality
+mun_centers <- st_coordinates(st_centroid(mun_sm$geometry))
+
+# Show the connections between neighboring municipalities
+# First we plot the borders (geometry) and then we plot the centroids
+plot(mun_sm$geometry); plot(nb, mun_centers, col = "red",add = TRUE)
+# Now we can see the neighborhoods. Only polygons that touch have neighbors, because we are using the adjacency definiton of neighborhood.
+```
+Now that we have defined neigboring municipalities, we can calculate Moran's I to test the spatial correlation of single men and women in 2020 across the municipalities. With Moran's I, we are checking whether neigboring municipalities are more correlated in terms of the distribution of single men and women compared to a random distribution. 
+
+__Moran's I__
+```{r Moran-DF, include=TRUE}
+# Create subset for single women
+DK_single_women <- DK_single_spatial %>%
+  filter(Sex == "Kvinder")
+
+# Create subset for single men
+DK_single_men <- DK_single_spatial %>%
+  filter(Sex == "Mænd")
+
+# Run a Moran's I test for women
+moran.test(DK_single_women$pct_single2020,
+           nb2listw(nb, style = "W", zero.policy=TRUE),
+           zero.policy=TRUE)
+
+# Run a Moran's I test for men
+moran.test(DK_single_men$pct_single2020,
+           nb2listw(nb, style = "W", zero.policy=TRUE),
+           zero.policy=TRUE)
+
+# Monte Carlo simulation for women
+moran.mc(DK_single_women$pct_single2020, 
+         nb2listw(nb, zero.policy=TRUE),
+         zero.policy=TRUE, nsim = 999) 
+
+# Monte Carlo simulation for men
+moran.mc(DK_single_men$pct_single2020,
+         nb2listw(nb, zero.policy=TRUE),
+         zero.policy=TRUE, nsim = 999) 
+```
+__Conclusion: Is the population of single women/men in Denmark spatially correlated?__
+When testing for spatial autocorrelation for the distribution of single women in Denmark in 2020, Moran's I is negative indicating dispersal and the p-value is >0.05 suggesting insignificant spatial correlation. For single men Moran's I is positive indicating clustering, and the p-value is >0.05 again suggesting insignificant spatial correlation. 
+When doing the Monte Carlo simulations for both men and women, the p-value for women is >0.05 suggesting insignificant spatial correlation, while the p-value for men is again >0.05 suggesting insignificant spatial correlation.
