@@ -1,6 +1,8 @@
 ---
 title: 'Homework_week8: Autocorrelation and Danish single people in 2020'
-output: word_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 Description of task: Test for the autocorrelation of the distribution of single women OR single men in Denmark during 2020, and answer the question: "Is the population of single women/men in Denmark spatially correlated? What is the correlation and how significant is the trend?
@@ -24,8 +26,7 @@ library(spdep)
 ```
 
 __Load spatial data__
-First we need some spatial data for Danish municipalities
-```{r load-spdata, include=TRUE}
+```{r load-spdata}
 # Load Danish municipalities data as spatial dataframe
 mun_sp <- readRDS("data/gadm36_DNK_2_sp.rds") 
 
@@ -53,7 +54,7 @@ mun$NAME_2[60] <- "Vesthimmerlands"
 
 __Load attributes and join with spatial data__
 Below I calculate the total number of men and women in each municipality as well as the percentages for single men and women.
-```{r spatial attributes, include=TRUE}
+```{r spatialattributes}
 # Load civil status data 
 DK_civilstatus <- read_csv("data/DK_civilstatus.csv")
 
@@ -107,7 +108,7 @@ DK_single_spatial <- mun %>%
 
 __Examine the distribution of single men and women in 2015 to 2020__
 Let's take a look at the data. Let's visualize the percentage of single men and women distributed across municipalities in Denmark from 2015 to 2020
-```{r map-data, include=TRUE}
+```{r map-data}
 # Distribution of single Danish people across Denmark in 2015
 DK_single_spatial %>% 
   filter(grepl("^M|^K", Sex)) %>% 
@@ -159,7 +160,7 @@ DK_single_spatial %>%
 To get a better insight into the distribution of single people across Denmark we can make a cartogram that makes each region proportional to its population.
 
 __Cartogram__
-```{r cartogram-DF, echo=TRUE}
+```{r cartogram-DF, echo=FALSE}
 # Create subset for single women
 DK_single_women <- DK_single_spatial %>%
   filter(Sex == "Kvinder")
@@ -200,7 +201,7 @@ With the cartograms we now have a much better insight into the distribution of s
 Now we can test for autocorrelation, i.e. testing whether neighboring municipalities are more similar in terms of their distribution of single men and women in 2020 compared to randomly selected municipalities.
 
 __Spatial autocorrelation test__
-```{r spatialcorrelation, include=TRUE}
+```{r spatialcorrelation}
 # First we need to define the neigboring municipalities.
 
 # Simplify the municipalities with a tolerance of 250
@@ -225,7 +226,7 @@ plot(mun_sm$geometry); plot(nb, mun_centers, col = "red",add = TRUE)
 Now that we have defined neigboring municipalities, we can calculate Moran's I to test the spatial correlation of single men and women in 2020 across the municipalities. With Moran's I, we are checking whether neigboring municipalities are more correlated in terms of the distribution of single men and women compared to a random distribution. 
 
 __Moran's I__
-```{r Moran-DF, include=TRUE}
+```{r Moran}
 # Create subset for single women
 DK_single_women <- DK_single_spatial %>%
   filter(Sex == "Kvinder")
